@@ -358,7 +358,7 @@ class FanucInterface(object):
     box_pose.pose.position.y = 0.0
     box_pose.pose.position.z = 0.0
     hand_box_name = "hand_box"
-    self.scene.add_mesh(hand_box_name, box_pose, '/home/zach1804/catkin_ws/src/fanuc_demo/src/mesh/New_Hand_Mesh_V3.stl')
+    self.scene.add_mesh(hand_box_name, box_pose, '/home/hunter/catkin_ws/src/fanuc_demo/src/mesh/New_Hand_Mesh_V3.stl')
     return self.wait_for_state_update(box_is_known=True, timeout=timeout)
 
   def attach_hand_mesh(self, timeout=4): #changed timeout from 8 to 4
