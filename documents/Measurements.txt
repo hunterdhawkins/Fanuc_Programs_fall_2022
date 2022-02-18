@@ -5,3 +5,5 @@ Keyboard:
   Height from floor pressed = 74cm
   Farthest octave = 18.4cm
   Individual key length = 2.2225cm
+  Individual key length + gap = 2.27586206897cm
+  
