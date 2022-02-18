@@ -9,6 +9,7 @@ import time
 
 def main():
     fanuc = controller.FanucInterface()
+    time.sleep(5)
     joints = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 
     for i in range(1, 4):

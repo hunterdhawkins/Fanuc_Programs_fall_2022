@@ -1,0 +1,16 @@
+To do next:
+ - Get keyboard to work
+ - Use tape to mark a set position for the table AND the keyboard
+ - Find out how to move with XYZ coordinates (instead of just joint rotations)
+ - Figure out the accuracy of the current models in RViz (especially for the table)
+ - Figure out what units are used by Larry for its XYZ positions
+ - Learn how to control claw (and see if it can play an octave)
+
+Future:
+ - Play a note using the state machine model
+ - Add black notes
+ - Play a song from an array/file of positions
+ - (Optional) Play a song from a list of notes
+ - (Optional) Use camera to find keyboard
+ - (Optional) Have robot turn the keyboard on and off
+
