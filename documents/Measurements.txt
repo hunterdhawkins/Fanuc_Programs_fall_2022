@@ -1,0 +1,7 @@
+Keyboard:
+  Height from table with non pressed key = 7cm
+  Height from table with pressed key = 6cm
+  Height from floor non pressed = 75cm
+  Height from floor pressed = 74cm
+  Farthest octave = 18.4cm
+  Individual key length = 2.2225cm
