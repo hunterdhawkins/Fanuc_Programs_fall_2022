@@ -36,18 +36,9 @@ def main():
     fanuc.go_to_joint_state(joints)
 
     # Create object for controlling XYZ position and move to it.
-    print("Moving to right above table")
-    pos = PositionController(fanuc, 0, 0.75, 1.5)
+    print("Moving to (0, 1, 2)")
+    pos = PositionController(fanuc, 0, 1, 2)
     pos.move()
-
-    # Move side to side across the table 3 times.
-    print("Moving back and forth")
-    for i in range(0, 3):
-        pos.x += 1
-        pos.move()
-        pos.x -= 2
-        pos.move()
-        pos.x += 1
 
 # Boilerplate.
 if __name__ == '__main__':
