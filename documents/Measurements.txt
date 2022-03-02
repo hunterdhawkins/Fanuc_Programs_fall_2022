@@ -7,3 +7,7 @@ Keyboard:
   Individual key length = 2.2225cm
   Individual key length + gap = 2.27586206897cm
   
+Notes:
+  Minimum height we can currently reach (03/01/2022) 1.18
+  
+  
