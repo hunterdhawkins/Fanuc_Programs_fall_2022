@@ -17,3 +17,4 @@ Optional feature ideas:
 - Play a song from a list of notes
 - Use a camera to find the piano and position itself accordingly
 - Have the robot turn the piano on and off automatically
+- Fix the play in the claw
