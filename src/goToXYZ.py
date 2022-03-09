@@ -7,19 +7,28 @@ import rospy
 
 # Makes it easier to control the robot's XYZ position.
 class PositionController:
-    def __init__(self, f, x=0, y=0, z=0):
+    def __init__(self, f, x=0, y=0, z=0, angle1=0, angle2=0, angle3=0, angle4=0):
         self.fanuc = f
         self.x = x
         self.y = y
         self.z = z
+        self.angle1 = angle1
+        self.angle2 = angle2
+        self.angle3 = angle3
+        self.angle4 = angle4
 
-    def set(self, x, y, z):
+    def set(self, x, y, z, angle1, angle2, angle3, angle4):
         self.x = x
         self.y = y
         self.z = z
+        self.angle1 = angle1
+        self.angle2 = angle2
+        self.angle3 = angle3
+        self.angle4 = angle4
+
 
     def get(self):
-        position = [self.x, self.y, self.z]
+        position = [self.x, self.y, self.z, self.angle1, self.angle2, self.angle3, self.angle4]
         return position
 
     def move(self):
@@ -37,7 +46,7 @@ def main():
 
     # Create object for controlling XYZ position and move to it.
     print("Moving to right above table")
-    pos = PositionController(fanuc, 0, 0.75, 1.5)
+    pos = PositionController(fanuc, 0, 0.75, 1.5, 0.0870129, -0.0676836, -0.64532, 0.755912)
     pos.move()
 
     # Move side to side across the table 3 times.

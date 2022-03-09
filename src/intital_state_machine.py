@@ -50,7 +50,7 @@ class RoboticArm():
 		if lined_up:
 			print("We have reached the ready state, now ready to play")
 			self.state = "move_to_key_position"
-			time.sleep(2)
+			#time.sleep(2)
 			self.run_state()
 
 
@@ -62,7 +62,7 @@ class RoboticArm():
 		if lined_up:
 			print("We are in position")
 			self.state = "play_note"
-			time.sleep(2)
+			#time.sleep(2)
 			self.run_state()
 
 
@@ -76,7 +76,7 @@ class RoboticArm():
                 self.fanuc.go_to_joint_state(joints)
 
 		self.state = "move_to_key_position"
-		time.sleep(2)
+		#time.sleep(2)
 		self.run_state()
 	
 
