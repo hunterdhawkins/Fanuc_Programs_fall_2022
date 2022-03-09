@@ -6,11 +6,13 @@ Keyboard:
   Farthest octave = 18.4cm
   Individual key length = 2.2225cm
   Individual key length + gap = 2.27586206897cm
+  Number of keys = 29
   
 ***********************************************************************************
 Arm:
   
 ********************************************************************************
+
 joint_limits:
   joint_1:
     #has_position_limits: true
