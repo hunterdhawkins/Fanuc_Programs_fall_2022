@@ -6,6 +6,7 @@ from tf.transformations import euler_from_quaternion
 from tf.transformations import quaternion_from_euler
 import rospy
 import time
+from moveit_msgs.msg import Constraints
 
 
 '''####################################################################################
@@ -72,9 +73,11 @@ class PositionController:
 
 class RoboticArm():
 	def __init__(self):
+                constraints = Constraints()
+                print(constraints)
+
                 # Get controller for robot.
                 self.fanuc = controller.FanucInterface()
-                self.fanuc.setOrientationTolerance(0.1)
 
 		self.state = "move_to_ready_state"
 		self.states = {
@@ -140,7 +143,7 @@ class RoboticArm():
 	def play_note(self):
 		print("********************Playing Note**************************")
                 self.note += 1
-                self.pos = PositionController(self.fanuc, -0.09 + (self.note * -0.0225), 1.29, 1.0 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
+                self.pos = PositionController(self.fanuc, -0.08 + (self.note * -0.0225), 1.29, 1.005 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
 
                 # Tilt claw down.
                 ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
