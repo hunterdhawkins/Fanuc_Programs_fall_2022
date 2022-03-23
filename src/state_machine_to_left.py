@@ -101,16 +101,16 @@ class RoboticArm():
 
                 # Choose starting note.
                 self.note = 0
-                self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
-                #self.pos = PositionController(self.fanuc, -0.09 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)
+                '''self.pos = PositionController(self.fanuc, -0.09 + (self.note * -0.0225), 1.29, 1.0 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)'''
+                self.pos = PositionController(self.fanuc, 0.09 + (self.note * 0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)
 
                 # Tilt claw down.
                 ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
                 rpy_tuple = euler_from_quaternion(ori_list)
                 rpy_list = [0.0, 0.0, 0.0]
-                rpy_list[0] = rpy_tuple[0] 
+                rpy_list[0] = rpy_tuple[0] - 0.3
                 rpy_list[1] = rpy_tuple[1] - 0.5
-                rpy_list[2] = rpy_tuple[2] - 0.2
+                rpy_list[2] = rpy_tuple[2] - 0.3
                 ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
                 self.pos.angle1 = ori_list[0]
                 self.pos.angle2 = ori_list[1]
@@ -144,16 +144,16 @@ class RoboticArm():
 	def play_note(self):
 		print("********************Playing Note**************************")
                 self.note += 1
-                self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
-                '''self.pos = PositionController(self.fanuc, -0.08 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)'''
+                '''self.pos = PositionController(self.fanuc, -0.08 + (self.note * -0.0225), 1.29, 1.0  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)'''
+                self.pos = PositionController(self.fanuc, 0.08 + (self.note * 0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)
 
                 # Tilt claw down.
                 ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
                 rpy_tuple = euler_from_quaternion(ori_list)
                 rpy_list = [0.0, 0.0, 0.0]
-                rpy_list[0] = rpy_tuple[0]
+                rpy_list[0] = rpy_tuple[0] - 0.3
                 rpy_list[1] = rpy_tuple[1] - 0.5
-                rpy_list[2] = rpy_tuple[2] - 0.2
+                rpy_list[2] = rpy_tuple[2] - 0.3
                 ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
                 self.pos.angle1 = ori_list[0]
                 self.pos.angle2 = ori_list[1]
