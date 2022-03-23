@@ -81,6 +81,7 @@ class RoboticArm():
         # Get controller for robot.
         self.fanuc = controller.FanucInterface()
         self.pub = pub
+        self.claw_spacing = 0
         self.state = "move_to_ready_state"
         self.states = {
 			"move_to_ready_state": self.move_to_ready_state,
@@ -98,6 +99,14 @@ class RoboticArm():
         # X diff = 0.63, Z diff = 0.04
         # Note X diff = 0.0225, Note Z diff = 0.00143
         # 0 = leftmost note, 28 = rightmost note
+
+        #0-7 this is the number of notes apart we are trying to move the claw
+        self.claw_spacing = 0
+        self.claw_spacing = str(self.claw_spacing)
+        rospy.loginfo(self.claw_spacing)
+        self.pub.publish(self.claw_spacing)
+        #self.rate.sleep()
+
 
         # Choose starting note.
         self.note = 0
@@ -146,10 +155,12 @@ class RoboticArm():
     def play_note(self):
         print("********************Playing Note**************************")
         #hello_str = "hello world %s" % rospy.get_time()
+        '''
         hello_str = "hello world" 
         rospy.loginfo(hello_str)
         self.pub.publish(hello_str)
         #self.rate.sleep()
+        '''
 
         self.note += 1
         self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
