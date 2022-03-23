@@ -9,6 +9,8 @@ import time
 from moveit_msgs.msg import Constraints
 
 
+from std_msgs.msg import String
+
 '''####################################################################################
 									Notes
 # Each key appears to be 14/16th of an inch (0.875 inches)
@@ -72,20 +74,25 @@ class PositionController:
 
 
 class RoboticArm():
-	def __init__(self):
-                constraints = Constraints()
-                print(constraints)
+    def __init__(self):
+        constraints = Constraints()
+        print(constraints)
 
-                # Get controller for robot.
-                self.fanuc = controller.FanucInterface()
+        # Get controller for robot.
+        self.fanuc = controller.FanucInterface()
+        '''
+        self.pub = rospy.Publisher('chatter', String, queue_size=10)
+        rospy.init_node('talker', anonymous=True)
+        self.rate = rospy.Rate(10) # 10hz
+        '''
 
-		self.state = "move_to_ready_state"
-		self.states = {
+        self.state = "move_to_ready_state"
+        self.states = {
 			"move_to_ready_state": self.move_to_ready_state,
 			"move_to_key_position": self.move_to_key_position,
 			"play_note": self.play_note
 		}
-		self.run_state()
+        self.run_state()
     
 
 
@@ -95,37 +102,37 @@ class RoboticArm():
 	def move_to_ready_state(self):
 		print("Moving to the ready state which is the right or left side of the piano")
 
-                # X diff = 0.63, Z diff = 0.04
-                # Note X diff = 0.0225, Note Z diff = 0.00143
-                # 0 = leftmost note, 28 = rightmost note
+        # X diff = 0.63, Z diff = 0.04
+        # Note X diff = 0.0225, Note Z diff = 0.00143
+        # 0 = leftmost note, 28 = rightmost note
 
-                # Choose starting note.
-                self.note = 0
-                self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
-                #self.pos = PositionController(self.fanuc, -0.09 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)
+        # Choose starting note.
+        self.note = 0
+        self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
+        #self.pos = PositionController(self.fanuc, -0.09 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)
 
-                # Tilt claw down.
-                ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
-                rpy_tuple = euler_from_quaternion(ori_list)
-                rpy_list = [0.0, 0.0, 0.0]
-                rpy_list[0] = rpy_tuple[0] 
-                rpy_list[1] = rpy_tuple[1] - 0.5
-                rpy_list[2] = rpy_tuple[2] - 0.2
-                ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
-                self.pos.angle1 = ori_list[0]
-                self.pos.angle2 = ori_list[1]
-                self.pos.angle3 = ori_list[2]
-                self.pos.angle4 = ori_list[3]
+        # Tilt claw down.
+        ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
+        rpy_tuple = euler_from_quaternion(ori_list)
+        rpy_list = [0.0, 0.0, 0.0]
+        rpy_list[0] = rpy_tuple[0] 
+        rpy_list[1] = rpy_tuple[1] - 0.5
+        rpy_list[2] = rpy_tuple[2] - 0.2
+        ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
+        self.pos.angle1 = ori_list[0]
+        self.pos.angle2 = ori_list[1]
+        self.pos.angle3 = ori_list[2]
+        self.pos.angle4 = ori_list[3]
 
-                # Move.
-                self.pos.move()
+        # Move.
+        self.pos.move()
 
-		lined_up = True
-		if lined_up:
-			print("We have reached the ready state, now ready to play")
-			self.state = "move_to_key_position"
-			#time.sleep(2)
-			self.run_state()
+        lined_up = True
+        if lined_up:
+        	print("We have reached the ready state, now ready to play")
+        	self.state = "move_to_key_position"
+        	#time.sleep(2)
+        	self.run_state()
 
 
 	#In our case here the lined_up flag would be triggered by knowing the X,Y,Z needed to be lined up with the key
@@ -143,32 +150,39 @@ class RoboticArm():
 	#This state will play a note for a certain amount of time and than move to the move to key psoition state	
 	def play_note(self):
 		print("********************Playing Note**************************")
-                self.note += 1
-                self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
-                '''self.pos = PositionController(self.fanuc, -0.08 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)'''
+        '''
+        hello_str = "hello world %s" % rospy.get_time()
+        rospy.loginfo(hello_str)
+        self.pub.publish(hello_str)
+        #self.rate.sleep()
+        '''
 
-                # Tilt claw down.
-                ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
-                rpy_tuple = euler_from_quaternion(ori_list)
-                rpy_list = [0.0, 0.0, 0.0]
-                rpy_list[0] = rpy_tuple[0]
-                rpy_list[1] = rpy_tuple[1] - 0.5
-                rpy_list[2] = rpy_tuple[2] - 0.2
-                ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
-                self.pos.angle1 = ori_list[0]
-                self.pos.angle2 = ori_list[1]
-                self.pos.angle3 = ori_list[2]
-                self.pos.angle4 = ori_list[3]
+        self.note += 1
+        self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
+        '''self.pos = PositionController(self.fanuc, -0.08 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)'''
 
-                self.pos.move()
-                self.pos.z -= 0.05
-                self.pos.move()
-                self.pos.z += 0.05
-                self.pos.move()
+        # Tilt claw down.
+        ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
+        rpy_tuple = euler_from_quaternion(ori_list)
+        rpy_list = [0.0, 0.0, 0.0]
+        rpy_list[0] = rpy_tuple[0]
+        rpy_list[1] = rpy_tuple[1] - 0.5
+        rpy_list[2] = rpy_tuple[2] - 0.2
+        ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
+        self.pos.angle1 = ori_list[0]
+        self.pos.angle2 = ori_list[1]
+        self.pos.angle3 = ori_list[2]
+        self.pos.angle4 = ori_list[3]
 
-		self.state = "move_to_key_position"
-		#time.sleep(2)
-		self.run_state()
+        self.pos.move()
+        self.pos.z -= 0.05
+        self.pos.move()
+        self.pos.z += 0.05
+        self.pos.move()
+
+        self.state = "move_to_key_position"
+        #time.sleep(2)
+        self.run_state()
 	
 
 	
