@@ -74,18 +74,13 @@ class PositionController:
 
 
 class RoboticArm():
-    def __init__(self):
+    def __init__(self, pub):
         constraints = Constraints()
         print(constraints)
 
         # Get controller for robot.
         self.fanuc = controller.FanucInterface()
-        '''
-        self.pub = rospy.Publisher('chatter', String, queue_size=10)
-        rospy.init_node('talker', anonymous=True)
-        self.rate = rospy.Rate(10) # 10hz
-        '''
-
+        self.pub = pub
         self.state = "move_to_ready_state"
         self.states = {
 			"move_to_ready_state": self.move_to_ready_state,
@@ -93,14 +88,12 @@ class RoboticArm():
 			"play_note": self.play_note
 		}
         self.run_state()
-    
-
 
 
 	#In this state we will move from the robotic arms resting state to our ready state
 	#Ideally this will be to the left or right side of the piano
-	def move_to_ready_state(self):
-		print("Moving to the ready state which is the right or left side of the piano")
+    def move_to_ready_state(self):
+        print("Moving to the ready state which is the right or left side of the piano")
 
         # X diff = 0.63, Z diff = 0.04
         # Note X diff = 0.0225, Note Z diff = 0.00143
@@ -124,8 +117,10 @@ class RoboticArm():
         self.pos.angle3 = ori_list[2]
         self.pos.angle4 = ori_list[3]
 
+        print("Before move")
         # Move.
         self.pos.move()
+        print("after move")
 
         lined_up = True
         if lined_up:
@@ -137,25 +132,24 @@ class RoboticArm():
 
 	#In our case here the lined_up flag would be triggered by knowing the X,Y,Z needed to be lined up with the key
 	#We would do this by Comparing our current position with that known X,Y,Z, and if we are within a certain threshould (2mm) then move to the play note state
-	def move_to_key_position(self):
-		print("Moving to the position of the key")
-		lined_up = True
-		if lined_up:
-			print("We are in position")
-			self.state = "play_note"
-			#time.sleep(2)
-			self.run_state()
+    def move_to_key_position(self):
+        print("Moving to the position of the key")
+        lined_up = True
+        if lined_up:
+            print("We are in position")
+            self.state = "play_note"
+            #time.sleep(2)
+            self.run_state()
 
 
 	#This state will play a note for a certain amount of time and than move to the move to key psoition state	
-	def play_note(self):
-		print("********************Playing Note**************************")
-        '''
-        hello_str = "hello world %s" % rospy.get_time()
+    def play_note(self):
+        print("********************Playing Note**************************")
+        #hello_str = "hello world %s" % rospy.get_time()
+        hello_str = "hello world" 
         rospy.loginfo(hello_str)
         self.pub.publish(hello_str)
         #self.rate.sleep()
-        '''
 
         self.note += 1
         self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
@@ -186,15 +180,19 @@ class RoboticArm():
 	
 
 	
-	def run_state(self):
-		self.states[self.state]()
-
+    def run_state(self):
+        self.states[self.state]()
 
 
 
 
 def main():
-	arm=RoboticArm()
-	arm.run_state()
+    pub = rospy.Publisher('chatter', String, queue_size=10)
+    #rospy.init_node('talker', anonymous=True)
+    #rate = rospy.Rate(10) # 10hz
+
+
+    arm=RoboticArm(pub)
+    arm.run_state()
 
 main()
