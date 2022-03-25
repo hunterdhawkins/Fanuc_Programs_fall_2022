@@ -9,7 +9,7 @@ import time
 from moveit_msgs.msg import Constraints
 
 
-from std_msgs.msg import String
+from std_msgs.msg import String, Int16
 
 '''####################################################################################
 									Notes
@@ -96,28 +96,40 @@ class RoboticArm():
     def move_to_ready_state(self):
         print("Moving to the ready state which is the right or left side of the piano")
 
+        init_joint_goal = self.fanuc.move_group.get_current_joint_values() 
+        init_joint_goal[1] = 1.20
+        self.fanuc.go_to_joint_state(init_joint_goal)
+        
         # X diff = 0.63, Z diff = 0.04
         # Note X diff = 0.0225, Note Z diff = 0.00143
         # 0 = leftmost note, 28 = rightmost note
 
-        #0-7 this is the number of notes apart we are trying to move the claw
-        self.claw_spacing = 0
-        self.claw_spacing = str(self.claw_spacing)
-        rospy.loginfo(self.claw_spacing)
-        self.pub.publish(self.claw_spacing)
-        #self.rate.sleep()
 
+        #need to account for how wide open the claw is and adjust z accordingly
 
         # Choose starting note.
-        self.note = 0
-        self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99 + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
-        #self.pos = PositionController(self.fanuc, -0.09 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)
+        #these will have values of 0-28
+        self.note1 = 0.0
+        self.note2 = 7.0
+
+        note = (self.note1 + self.note2)/2.0
+
+        self.pos = PositionController(
+            self.fanuc,
+            -0.087 + (note * -0.0228),
+            1.29,
+            0.99 + (note * -0.00143),
+            0.0870129,
+            -0.0676836,
+            -0.64532,
+            0.755912)
+
 
         # Tilt claw down.
         ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
         rpy_tuple = euler_from_quaternion(ori_list)
         rpy_list = [0.0, 0.0, 0.0]
-        rpy_list[0] = rpy_tuple[0] 
+        rpy_list[0] = rpy_tuple[0] - 0.1
         rpy_list[1] = rpy_tuple[1] - 0.5
         rpy_list[2] = rpy_tuple[2] - 0.2
         ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
@@ -126,51 +138,48 @@ class RoboticArm():
         self.pos.angle3 = ori_list[2]
         self.pos.angle4 = ori_list[3]
 
-        print("Before move")
-        # Move.
+
         self.pos.move()
-        print("after move")
 
         lined_up = True
         if lined_up:
         	print("We have reached the ready state, now ready to play")
         	self.state = "move_to_key_position"
-        	#time.sleep(2)
         	self.run_state()
 
 
 	#In our case here the lined_up flag would be triggered by knowing the X,Y,Z needed to be lined up with the key
 	#We would do this by Comparing our current position with that known X,Y,Z, and if we are within a certain threshould (2mm) then move to the play note state
     def move_to_key_position(self):
-        print("Moving to the position of the key")
-        lined_up = True
-        if lined_up:
-            print("We are in position")
-            self.state = "play_note"
-            #time.sleep(2)
-            self.run_state()
+
+        print("********************Moving to key position **************************")
+
+        self.note1 += 1.0
+        self.note2 += 1.0
 
 
-	#This state will play a note for a certain amount of time and than move to the move to key psoition state	
-    def play_note(self):
-        print("********************Playing Note**************************")
-        #hello_str = "hello world %s" % rospy.get_time()
-        '''
-        hello_str = "hello world" 
-        rospy.loginfo(hello_str)
-        self.pub.publish(hello_str)
-        #self.rate.sleep()
-        '''
+        claw_spacing = abs(self.note1 - self.note2)
+        self.pub.publish(claw_spacing)
 
-        self.note += 1
-        self.pos = PositionController(self.fanuc, -0.087 + (self.note * -0.0228), 1.29, 0.99  + (self.note * -0.00143), 0.0870129, -0.0676836, -0.64532, 0.755912)
-        '''self.pos = PositionController(self.fanuc, -0.08 + (self.note * -0.0225), 1.29, 1.0 , 0.0870129, -0.0676836, -0.64532, 0.755912)'''
+        note = (self.note1 + self.note2)/2.0
+
+        print(note)
+
+
+        self.pos = PositionController(self.fanuc,
+        -0.087 + (note * -0.0228)
+        , 1.29
+        , 0.99  + (note * -0.00143) + (claw_spacing * -0.0010) # + something for how wide claw is      
+        , 0.0870129
+        , -0.0676836
+        , -0.64532
+        , 0.755912)
 
         # Tilt claw down.
         ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
         rpy_tuple = euler_from_quaternion(ori_list)
         rpy_list = [0.0, 0.0, 0.0]
-        rpy_list[0] = rpy_tuple[0]
+        rpy_list[0] = rpy_tuple[0] - 0.1
         rpy_list[1] = rpy_tuple[1] - 0.5
         rpy_list[2] = rpy_tuple[2] - 0.2
         ori_list = quaternion_from_euler(rpy_list[0], rpy_list[1], rpy_list[2])
@@ -179,18 +188,28 @@ class RoboticArm():
         self.pos.angle3 = ori_list[2]
         self.pos.angle4 = ori_list[3]
 
+
+
         self.pos.move()
+        self.state = "play_note"
+        self.run_state()
+
+
+	#This state will play a note for a certain amount of time and than move to the move to key psoition state	
+    def play_note(self):
+        print("********************Playing Note**************************")
+
         self.pos.z -= 0.05
         self.pos.move()
         self.pos.z += 0.05
         self.pos.move()
 
+        
         self.state = "move_to_key_position"
-        #time.sleep(2)
         self.run_state()
+        
 	
 
-	
     def run_state(self):
         self.states[self.state]()
 
@@ -198,7 +217,7 @@ class RoboticArm():
 
 
 def main():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
+    pub = rospy.Publisher('chatter', Int16 , queue_size=10)
     #rospy.init_node('talker', anonymous=True)
     #rate = rospy.Rate(10) # 10hz
 
