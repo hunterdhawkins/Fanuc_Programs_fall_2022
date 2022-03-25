@@ -97,7 +97,7 @@ class RoboticArm():
         print("Moving to the ready state which is the right or left side of the piano")
 
         init_joint_goal = self.fanuc.move_group.get_current_joint_values() 
-        init_joint_goal[1] = 1.20
+        init_joint_goal[1] = 1.0
         self.fanuc.go_to_joint_state(init_joint_goal)
         
         # X diff = 0.63, Z diff = 0.04
@@ -115,14 +115,14 @@ class RoboticArm():
         note = (self.note1 + self.note2)/2.0
 
         self.pos = PositionController(
-            self.fanuc,
-            -0.087 + (note * -0.0228),
-            1.29,
-            0.99 + (note * -0.00143),
-            0.0870129,
-            -0.0676836,
-            -0.64532,
-            0.755912)
+            self.fanuc
+            ,-0.771 + (note * 0.0228)
+            ,1.29
+            ,0.95  + (note * 0.00143)
+            ,0.0870129
+            ,-0.0676836
+            ,-0.64532
+            ,0.755912)
 
 
         # Tilt claw down.
@@ -167,9 +167,9 @@ class RoboticArm():
 
 
         self.pos = PositionController(self.fanuc,
-        -0.087 + (note * -0.0228)
+        -0.771 + (note * 0.0228)
         , 1.29
-        , 0.99  + (note * -0.00143) + (claw_spacing * -0.0010) # + something for how wide claw is      
+        , 0.95  + (note * 0.00143) + (claw_spacing * -0.0015) # + something for how wide claw is      
         , 0.0870129
         , -0.0676836
         , -0.64532
