@@ -9,6 +9,8 @@ import time
 from moveit_msgs.msg import Constraints
 
 
+
+
 from std_msgs.msg import String, Int16
 
 '''####################################################################################
@@ -27,7 +29,25 @@ from std_msgs.msg import String, Int16
 # Each state is a function
 # the function should handle dealing with the situation that the state represents
 # and switch to other states at predetermined spots based upon conditions
-	
+
+
+note_array1 = [18, 18, 18, 18, 18, 18,
+               17, 17, 17, 17, 17, 17,
+               16,16, 16, 16, 16, 16,
+               15, 15, 15, 15, 16, 17, 
+               18, 18, 18, 18, 18, 18,
+               17, 17, 17, 17, 17, 17,
+               16, 16, 16, 16, 16, 16, 
+               15, 15, 18, 15]
+
+note_array2 = [19, 19, 19, 19, 19, 19,
+              19, 19, 19, 19, 19, 19,
+              21, 21, 21, 21, 20, 21,
+              22, 22, 22, 22, 21, 20, 
+              19, 19, 19, 19, 19, 19,
+              19, 19, 19, 19, 19, 19,
+              21, 21, 21, 21, 20, 21,
+              22, 22, 19, 22]
 
 # Makes it easier to control the robot's XYZ position.
 class PositionController:
@@ -82,11 +102,15 @@ class RoboticArm():
         self.fanuc = controller.FanucInterface()
         self.pub = pub
         self.claw_spacing = 0
+        #self.note1 = note_array1
+        #self.note2 = note_array2
+        self.note_index = 0
         self.state = "move_to_ready_state"
         self.states = {
 			"move_to_ready_state": self.move_to_ready_state,
 			"move_to_key_position": self.move_to_key_position,
-			"play_note": self.play_note
+			"play_note": self.play_note,
+            "end_of_song": self.end_of_song
 		}
         self.run_state()
 
@@ -107,12 +131,7 @@ class RoboticArm():
 
         #need to account for how wide open the claw is and adjust z accordingly
 
-        # Choose starting note.
-        #these will have values of 0-28
-        self.note1 = 0.0
-        self.note2 = 7.0
-
-        note = (self.note1 + self.note2)/2.0
+        note = 14.0
 
         self.pos = PositionController(
             self.fanuc
@@ -154,14 +173,20 @@ class RoboticArm():
 
         print("********************Moving to key position **************************")
 
-        self.note1 += 1.0
-        self.note2 += 1.0
+        print(len(note_array1))
+        print(self.note_index)
+        if self.note_index == len(note_array1):
+            self.state = "end_of_song"
+            self.run_state()
+
+        note1 = note_array1[self.note_index]
+        note2 = note_array2[self.note_index]
 
 
-        claw_spacing = abs(self.note1 - self.note2)
+        claw_spacing = abs(note1 - note2)
         self.pub.publish(claw_spacing)
 
-        note = (self.note1 + self.note2)/2.0
+        note = (note1 + note2)/2.0
 
         print(note)
 
@@ -204,14 +229,22 @@ class RoboticArm():
         self.pos.z += 0.05
         self.pos.move()
 
-        
+        self.note_index += 1
+
         self.state = "move_to_key_position"
         self.run_state()
+
         
 	
 
     def run_state(self):
         self.states[self.state]()
+
+
+    def end_of_song(self):
+        print("Done with song")
+        quit()
+
 
 
 
