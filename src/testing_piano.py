@@ -7,25 +7,9 @@ from fanuc_demo.msg import fullCoordinate
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from std_msgs.msg import Int16
 
-note_array1 = [18, 18, 18, 18, 18, 18,
-               17, 17, 17, 17, 17, 17,
-               16, 16, 16, 16, 16, 16,
-               15, 15, 15, 15, 16, 17, 
-               18, 18, 18, 18, 18, 18,
-               17, 17, 17, 17, 17, 17,
-               16, 16, 16, 16, 16, 16, 
-               15, 15, 18, 15]
-
-note_array2 = [19, 19, 19, 19, 19, 19,
-               19, 19, 19, 19, 19, 19,
-               21, 21, 21, 21, 20, 21,
-               22, 22, 22, 22, 21, 20, 
-               19, 19, 19, 19, 19, 19,
-               19, 19, 19, 19, 19, 19,
-               21, 21, 21, 21, 20, 21,
-               22, 22, 19, 22]
 
 
+note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6']
 
 # Makes it easier to control the robot's XYZ position.
 class PositionController:
@@ -77,6 +61,42 @@ class RoboticArm():
         self.pub = pub
         self.claw_spacing = 0
         self.note_index = 0
+        self.note_array1 = []
+        self.note_array2 = []
+
+        user_file_name = raw_input("Enter the file name you would like to play ")
+
+        self.filename = open(user_file_name + "_notes.txt", 'r')
+
+        #read in file
+        while True:
+            note_numbers = self.filename.read(2);
+
+
+            if note_numbers == "\n\n":
+                #print("FOund the two newlines")
+                break
+            else:
+                index = note_character.index(note_numbers)
+                self.note_array1.append(index);
+                note_numbers = self.filename.read(2)
+
+        
+        #read in file
+        while True:
+            note_numbers = self.filename.read(2)
+
+            if note_numbers == "\n\n":
+                #print("FOund the two newlines")
+                break
+            else:
+                index = note_character.index(note_numbers)
+                self.note_array2.append(index);
+                note_numbers = self.filename.read(2)
+
+        self.filename.close()
+
+        #state machine logic
         self.states = {
             "move_to_ready_state": self.move_to_ready_state,
             "move_to_key_position": self.move_to_key_position,
@@ -121,15 +141,17 @@ class RoboticArm():
         print("********************Moving to key position **************************")
 
         # Stop if all of the notes have been played.
-        if self.note_index == len(note_array1):
+        if self.note_index == len(self.note_array1):
             self.state = "end_of_song"
             self.run_state()
 
         # Get the next notes.
-        note1 = note_array1[self.note_index]
-        note2 = note_array2[self.note_index]
+        note1 = self.note_array1[self.note_index]
+        note2 = self.note_array2[self.note_index]
 
         # Find the position and claw spacing, and send the spacing to the claw.
+
+        
         claw_spacing = abs(note1 - note2)
         self.pub.publish(claw_spacing)
         note = (note1 + note2)/2.0
@@ -143,15 +165,6 @@ class RoboticArm():
         , -0.0676836
         , -0.64532
         , 0.755912)
-
-        '''
-        # Set new position.
-        self.pos.set(
-            -0.771 + (note * 0.0228),
-            1.29,
-            0.95 + (note * 0.00143) + (claw_spacing * -0.0015))
-
-        '''
 
         value_list = self.pos.get()
         print(value_list)
@@ -197,6 +210,7 @@ class RoboticArm():
 
     # When the song ends, this state stops the program.
     def end_of_song(self):
+
         print("Done with song")
         quit()	
 
