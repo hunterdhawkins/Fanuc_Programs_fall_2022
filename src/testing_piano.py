@@ -11,6 +11,33 @@ from std_msgs.msg import Int16
 
 note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6']
 
+
+def read_in_from_file(arm ,arr):
+    #read in file
+    while True:
+        note_numbers = arm.filename.read(2);
+
+
+        if note_numbers == "\n\n":
+            #print("FOund the two newlines")
+            break
+        else:
+            if arr ==1:
+                index = note_character.index(note_numbers)
+                arm.note_array1.append(index);
+                note_numbers = arm.filename.read(2)
+            elif arr ==2:
+                index = note_character.index(note_numbers)
+                arm.note_array2.append(index);
+                note_numbers = arm.filename.read(2)
+            else:
+                arm.length_array.append(int(note_numbers));
+                note_numbers = arm.filename.read(2)
+            
+
+
+
+
 # Makes it easier to control the robot's XYZ position.
 class PositionController:
     def __init__(self, f, x=0, y=0, z=0, angle1=0.0870129, angle2=-0.0676836, angle3=-0.6453200, angle4=0.7559120):
@@ -63,36 +90,15 @@ class RoboticArm():
         self.note_index = 0
         self.note_array1 = []
         self.note_array2 = []
+        self.length_array = []
 
         user_file_name = raw_input("Enter the file name you would like to play ")
 
         self.filename = open(user_file_name + "_notes.txt", 'r')
 
-        #read in file
-        while True:
-            note_numbers = self.filename.read(2);
-
-
-            if note_numbers == "\n\n":
-                #print("FOund the two newlines")
-                break
-            else:
-                index = note_character.index(note_numbers)
-                self.note_array1.append(index);
-                note_numbers = self.filename.read(2)
-
-        
-        #read in file
-        while True:
-            note_numbers = self.filename.read(2)
-
-            if note_numbers == "\n\n":
-                #print("FOund the two newlines")
-                break
-            else:
-                index = note_character.index(note_numbers)
-                self.note_array2.append(index);
-                note_numbers = self.filename.read(2)
+        read_in_from_file(self, 1)
+        read_in_from_file(self, 2)
+        read_in_from_file(self, 3)
 
         self.filename.close()
 
@@ -197,6 +203,7 @@ class RoboticArm():
         # Move down and up.
         self.pos.z -= 0.05
         self.pos.move()
+        time.sleep(self.length_array[self.note_index])
         self.pos.z += 0.05
         self.pos.move()
 
