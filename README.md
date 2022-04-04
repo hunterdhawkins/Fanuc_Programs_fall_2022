@@ -1,7 +1,5 @@
 # Fanuc Robot Programs Fall 2022
 To do next:
-- Play a song from a file
-- Play a song from a list of note letters
 - Play black notes
 - Use a camera to find the piano and position itself accordingly
 - Have the robot turn the piano on and off automatically
@@ -16,3 +14,5 @@ Completed:
 - Ask Mary about joint 4
 - Open and close claw to play two notes at once
 - Play a song from a list of positions
+- Play a song from a file
+- Play a song from a list of note letters
