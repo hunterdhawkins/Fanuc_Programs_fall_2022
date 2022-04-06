@@ -91,16 +91,10 @@ class RoboticArm():
         self.note_array1 = []
         self.note_array2 = []
         self.length_array = []
+        self.user_file_name = ""
+        self.filename = ""
 
-        user_file_name = raw_input("Enter the file name you would like to play ")
 
-        self.filename = open(user_file_name + "_notes.txt", 'r')
-
-        read_in_from_file(self, 1)
-        read_in_from_file(self, 2)
-        read_in_from_file(self, 3)
-
-        self.filename.close()
 
         #state machine logic
         self.states = {
@@ -119,6 +113,21 @@ class RoboticArm():
     # In this state we will move from the robotic arms resting state to our ready state
     def move_to_ready_state(self):
         print("Moving to the ready state which is the middle of the piano")
+
+        self.user_file_name = raw_input("Enter the file name you would like to play or quit to exit ")
+
+
+        if self.user_file_name == "quit":
+            quit() 
+
+        self.filename = open(self.user_file_name + "_notes.txt", 'r')
+
+        read_in_from_file(self, 1)
+        read_in_from_file(self, 2)
+        read_in_from_file(self, 3)
+
+        self.filename.close()
+
 
         # Lift arm up to avoid hitting piano during move.
         init_joint_goal = self.fanuc.move_group.get_current_joint_values() 
@@ -217,9 +226,10 @@ class RoboticArm():
 
     # When the song ends, this state stops the program.
     def end_of_song(self):
-
         print("Done with song")
-        quit()	
+        self.state = "move_to_ready_state"
+        self.run_state()
+        
 
 
 
