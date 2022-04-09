@@ -7,7 +7,11 @@ from fanuc_demo.msg import fullCoordinate
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from std_msgs.msg import Int16
 
-note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6']
+note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
+                        'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
+                        'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
+                        'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5',
+                        'C6']
 
 
 
