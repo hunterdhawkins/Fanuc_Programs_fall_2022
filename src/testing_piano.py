@@ -7,16 +7,14 @@ from fanuc_demo.msg import fullCoordinate
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from std_msgs.msg import Int16
 
-
-
 note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2', 'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3', 'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6']
+
 
 
 def read_in_from_file(arm ,arr):
     #read in file
     while True:
         note_numbers = arm.filename.read(2);
-
 
         if note_numbers == "\n\n":
             #print("FOund the two newlines")
@@ -34,8 +32,6 @@ def read_in_from_file(arm ,arr):
                 arm.length_array.append(int(note_numbers));
                 note_numbers = arm.filename.read(2)
             
-
-
 
 
 # Makes it easier to control the robot's XYZ position.
@@ -94,8 +90,6 @@ class RoboticArm():
         self.user_file_name = ""
         self.filename = ""
 
-
-
         #state machine logic
         self.states = {
             "move_to_ready_state": self.move_to_ready_state,
@@ -114,20 +108,15 @@ class RoboticArm():
     def move_to_ready_state(self):
         print("Moving to the ready state which is the middle of the piano")
 
-        self.user_file_name = raw_input("Enter the file name you would like to play or quit to exit ")
-
-
+        self.user_file_name = raw_input("Enter the song you would like to play, or \"quit\" to exit: ")
         if self.user_file_name == "quit":
             quit() 
 
         self.filename = open(self.user_file_name + "_notes.txt", 'r')
-
         read_in_from_file(self, 1)
         read_in_from_file(self, 2)
         read_in_from_file(self, 3)
-
         self.filename.close()
-
 
         # Lift arm up to avoid hitting piano during move.
         init_joint_goal = self.fanuc.move_group.get_current_joint_values() 
@@ -164,9 +153,7 @@ class RoboticArm():
         note1 = self.note_array1[self.note_index]
         note2 = self.note_array2[self.note_index]
 
-        # Find the position and claw spacing, and send the spacing to the claw.
-
-        
+        # Find the position and claw spacing, and send the spacing to the claw.        
         claw_spacing = abs(note1 - note2)
         self.pub.publish(claw_spacing)
         note = (note1 + note2)/2.0
@@ -224,12 +211,11 @@ class RoboticArm():
         self.run_state()
 
 
-    # When the song ends, this state stops the program.
+    # When the song ends, this state allows the user to select another one to play.
     def end_of_song(self):
         print("Done with song")
         self.state = "move_to_ready_state"
         self.run_state()
-        
 
 
 
