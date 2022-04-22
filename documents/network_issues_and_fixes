@@ -1,0 +1,2 @@
+1) Larry didn't get an IP address, fixed by switch power cycle
+2) Ethernet on the arm pi wasn't receiving an IP address, fixed via unplugging and replugging in network extender in cage
