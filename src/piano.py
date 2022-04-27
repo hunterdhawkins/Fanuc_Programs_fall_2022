@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-
 import controller
 import rospy
 import time
@@ -7,6 +6,7 @@ from fanuc_demo.msg import fullCoordinate
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from std_msgs.msg import Int16
 
+# Text representation of each note.
 note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
                         'C3', 'D3', 'E3', 'F3', 'G3', 'A3', 'B3',
                         'C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4',
@@ -15,27 +15,37 @@ note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
 
 
 
-def read_in_from_file(arm ,arr):
-    #read in file
-    while True:
-        note_numbers = arm.filename.read(2);
+# Reads a line from a song file into an array.
+def read_in_from_file(arm, array_num):
+    # Read until a newline is reached.
+    note_number = ""
+    next_char = "start"
+    while not (next_char == "\n" or next_char == ""):
+        # Get the next character from the file.
+        next_char = arm.filename.read(1);
 
-        if note_numbers == "\n\n":
-            #print("FOund the two newlines")
-            break
-        else:
-            if arr ==1:
-                index = note_character.index(note_numbers)
-                arm.note_array1.append(index);
-                note_numbers = arm.filename.read(2)
-            elif arr ==2:
-                index = note_character.index(note_numbers)
-                arm.note_array2.append(index);
-                note_numbers = arm.filename.read(2)
+        # Check what character was read.
+        if next_char == "," or next_char == "\n" or next_char == "":
+            # Add the note number to the array.
+            if (array_num == 1):
+                # Find key position from note number, and add to first array.
+                key_position = note_character.index(note_number)
+                arm.note_array1.append(key_position)
+            elif (array_num == 2):
+                # Find key position from note number, and add to second array.
+                key_position = note_character.index(note_number)
+                arm.note_array2.append(key_position)
             else:
-                arm.length_array.append(int(note_numbers));
-                note_numbers = arm.filename.read(2)
-            
+                # Add the note number directly to the length array as an integer.
+                arm.length_array.append(int(note_number));
+
+            # Reset the note number to be ready to start reading the next note.
+            note_number = ""
+        elif not next_char.isspace():
+            # Ignore whitespace (besides newlines).
+            # Append the character to the note number.
+            note_number += next_char
+
 
 
 # Makes it easier to control the robot's XYZ position.
@@ -61,7 +71,6 @@ class PositionController:
         self.angle4 = angle4
         
 
-
     def set(self, x, y, z):
         self.x = x
         self.y = y
@@ -79,10 +88,10 @@ class PositionController:
 
 
 
-# Each state is a function
-# the function should handle dealing with the situation that the state represents
-# and switch to other states at predetermined spots based upon conditions
+# Each state is a function. The function should handle dealing with the situation that the state represents, and switch to
+# other states at predetermined spots based upon conditions.
 class RoboticArm():
+    # Initialization.
     def __init__(self, pub):
         self.fanuc = controller.FanucInterface() #get controller for robot
         self.pub = pub
@@ -104,18 +113,23 @@ class RoboticArm():
         self.run_state()
 
 
+    # This function repeatedly runs states in the state machine until the state becomes "exit".
     def run_state(self):
-        self.states[self.state]()
+        while self.state != "exit":
+            self.states[self.state]()
 
 
     # In this state we will move from the robotic arms resting state to our ready state
     def move_to_ready_state(self):
         print("Moving to the ready state which is the middle of the piano")
 
+        # Get user input, and end if "quit" is entered.
         self.user_file_name = raw_input("Enter the song you would like to play, or \"quit\" to exit: ")
         if self.user_file_name == "quit":
-            quit() 
+            self.state = "exit"
+            return
 
+        # Open the file and store it into the arrays.
         self.filename = open(self.user_file_name + "_notes.txt", 'r')
         read_in_from_file(self, 1)
         read_in_from_file(self, 2)
@@ -132,8 +146,12 @@ class RoboticArm():
         self.pos = PositionController(
             self.fanuc,
             -0.771 + (note * 0.0228),
-            1.29,
-            0.95 + (note * 0.00143))
+            1.27,
+            0.952 + (note * 0.00143),
+            0.0870129,
+            -0.0676836,
+            -0.64532,
+            0.755912)
 
         # Move arm.
         self.pos.move()
@@ -141,7 +159,6 @@ class RoboticArm():
         # Go to next state.
         print("We have reached the ready state, now ready to play")
         self.state = "move_to_key_position"
-        self.run_state()
 
 
     # This state moves the claw to the correct XYZ position to play the next note(s).
@@ -151,7 +168,7 @@ class RoboticArm():
         # Stop if all of the notes have been played.
         if self.note_index == len(self.note_array1):
             self.state = "end_of_song"
-            self.run_state()
+            return
 
         # Get the next notes.
         note1 = self.note_array1[self.note_index]
@@ -163,17 +180,16 @@ class RoboticArm():
         note = (note1 + note2)/2.0
         print(note)
 
-        self.pos = PositionController(self.fanuc,
-        -0.771 + (note * 0.0228)
-        , 1.29
-        , 0.95  + (note * 0.00143) + (claw_spacing * -0.0015) # + something for how wide claw is      
-        , 0.0870129
-        , -0.0676836
-        , -0.64532
-        , 0.755912)
-
-        value_list = self.pos.get()
-        print(value_list)
+        # Move to the key's position. 
+        self.pos = PositionController(
+            self.fanuc,
+            -0.771 + (note * 0.0228),
+            1.27,
+            0.952 + (note * 0.00143) + (claw_spacing * -0.0015),
+            0.0870129,
+            -0.0676836,
+            -0.64532,
+            0.755912)
 
         # Orient claw.
         ori_list = [self.pos.angle1, self.pos.angle2, self.pos.angle3, self.pos.angle4]
@@ -193,7 +209,6 @@ class RoboticArm():
 
         # Go to the next state.
         self.state = "play_note"
-        self.run_state()
 
 
     # This state will play a note for a certain amount of time and then move to the "move to key position" state.
@@ -212,14 +227,12 @@ class RoboticArm():
 
         # Go to the next state.
         self.state = "move_to_key_position"
-        self.run_state()
 
 
     # When the song ends, this state allows the user to select another one to play.
     def end_of_song(self):
         print("Done with song")
         self.state = "move_to_ready_state"
-        self.run_state()
 
 
 
