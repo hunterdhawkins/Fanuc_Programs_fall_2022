@@ -2,6 +2,7 @@
 import controller
 import rospy
 import time
+import os
 from fanuc_demo.msg import fullCoordinate
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from std_msgs.msg import Int16
@@ -124,9 +125,16 @@ class RoboticArm():
         print("Moving to the ready state which is the middle of the piano")
 
         # Get user input, and end if "quit" is entered.
-        self.user_file_name = raw_input("Enter the song you would like to play, or \"quit\" to exit: ")
+        self.user_file_name = raw_input("Enter the song you would like to play, or \"quit\" to exit, or \"list\" to list options: ")
         if self.user_file_name == "quit":
             self.state = "exit"
+            return
+        elif self.user_file_name == "list":
+            song_list = os.listdir("songs")
+            for song in song_list:
+                split = song.split("_notes.txt")
+                print(" - " + split[0])
+            self.state = "move_to_ready_state"
             return
 
         # Open the file and store it into the arrays.
