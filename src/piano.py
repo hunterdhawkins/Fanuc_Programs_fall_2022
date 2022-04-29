@@ -111,6 +111,7 @@ class RoboticArm():
             "play_note": self.play_note,
             "end_of_song": self.end_of_song}
         self.state = "move_to_ready_state"
+        print("Moving to the ready state")
         self.run_state()
 
 
@@ -122,8 +123,6 @@ class RoboticArm():
 
     # In this state we will move from the robotic arms resting state to our ready state
     def move_to_ready_state(self):
-        print("Moving to the ready state which is the middle of the piano")
-
         # Get user input, and end if "quit" is entered.
         self.user_file_name = raw_input("Enter the song you would like to play, or \"quit\" to exit, or \"list\" to list options: ")
         if self.user_file_name == "quit":
@@ -143,6 +142,9 @@ class RoboticArm():
         read_in_from_file(self, 2)
         read_in_from_file(self, 3)
         self.filename.close()
+
+        # Start playing.
+        print("Playing song")
 
         # Lift arm up to avoid hitting piano during move.
         init_joint_goal = self.fanuc.move_group.get_current_joint_values() 
@@ -165,13 +167,13 @@ class RoboticArm():
         self.pos.move()
 
         # Go to next state.
-        print("We have reached the ready state, now ready to play")
+        #print("We have reached the ready state, now ready to play")
         self.state = "move_to_key_position"
 
 
     # This state moves the claw to the correct XYZ position to play the next note(s).
     def move_to_key_position(self):
-        print("********************Moving to key position **************************")
+        #print("********************Moving to key position **************************")
 
         # Stop if all of the notes have been played.
         if self.note_index == len(self.note_array1):
@@ -186,14 +188,14 @@ class RoboticArm():
         claw_spacing = abs(note1 - note2)
         self.pub.publish(claw_spacing)
         note = (note1 + note2)/2.0
-        print(note)
+        #print(note)
 
         # Move to the key's position. 
         self.pos = PositionController(
             self.fanuc,
             -0.771 + (note * 0.0228),
             1.28,
-            0.96 + (note * 0.001) + (claw_spacing * -0.0015),
+            0.96 + (note * 0.001) + (claw_spacing * -0.0017),
             0.0870129,
             -0.0676836,
             -0.64532,
@@ -221,7 +223,7 @@ class RoboticArm():
 
     # This state will play a note for a certain amount of time and then move to the "move to key position" state.
     def play_note(self):
-        print("********************Playing Note**************************")
+        #print("********************Playing Note**************************")
 
         # Move down and up.
         self.pos.z -= 0.05
@@ -239,7 +241,7 @@ class RoboticArm():
 
     # When the song ends, this state allows the user to select another one to play.
     def end_of_song(self):
-        print("Done with song")
+        print("Done with song\n")
         self.state = "move_to_ready_state"
 
 
