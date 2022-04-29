@@ -130,7 +130,7 @@ class RoboticArm():
             return
 
         # Open the file and store it into the arrays.
-        self.filename = open(self.user_file_name + "_notes.txt", 'r')
+        self.filename = open("songs/" + self.user_file_name + "_notes.txt", "r")
         read_in_from_file(self, 1)
         read_in_from_file(self, 2)
         read_in_from_file(self, 3)
@@ -147,7 +147,7 @@ class RoboticArm():
             self.fanuc,
             -0.771 + (note * 0.0228),
             1.28,
-            0.955 + (note * 0.0011),
+            0.96 + (note * 0.0011),
             0.0870129,
             -0.0676836,
             -0.64532,
@@ -185,7 +185,7 @@ class RoboticArm():
             self.fanuc,
             -0.771 + (note * 0.0228),
             1.28,
-            0.955 + (note * 0.0011) + (claw_spacing * -0.0015),
+            0.96 + (note * 0.0011) + (claw_spacing * -0.0015),
             0.0870129,
             -0.0676836,
             -0.64532,
