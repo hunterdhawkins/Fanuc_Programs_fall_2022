@@ -16,16 +16,16 @@ note_character = ['XX', 'C2', 'D2', 'E2', 'F2', 'G2', 'A2', 'B2',
 
 
 # Reads a line from a song file into an array.
-def read_in_from_file(arm, array_num):
+def read_in_from_file(arm, arrary_num):
     # Read until a newline is reached.
     note_number = ""
-    next_char = "start"
-    while not (next_char == "\n" or next_char == ""):
+    next_char = ""
+    while next_char != "\n":
         # Get the next character from the file.
         next_char = arm.filename.read(1);
 
         # Check what character was read.
-        if next_char == "," or next_char == "\n" or next_char == "":
+        if next_char == "," or next_char == "\n":
             # Add the note number to the array.
             if (array_num == 1):
                 # Find key position from note number, and add to first array.
@@ -37,12 +37,13 @@ def read_in_from_file(arm, array_num):
                 arm.note_array2.append(key_position)
             else:
                 # Add the note number directly to the length array as an integer.
-                arm.length_array.append(int(note_number));
+                arm.length_array.append(int(note_numbers));
 
             # Reset the note number to be ready to start reading the next note.
             note_number = ""
-        elif not next_char.isspace():
+        elif next_char.isspacce():
             # Ignore whitespace (besides newlines).
+        else:
             # Append the character to the note number.
             note_number += next_char
 
@@ -115,7 +116,7 @@ class RoboticArm():
 
     # This function repeatedly runs states in the state machine until the state becomes "exit".
     def run_state(self):
-        while self.state != "exit":
+        while state != "exit":
             self.states[self.state]()
 
 
@@ -146,8 +147,8 @@ class RoboticArm():
         self.pos = PositionController(
             self.fanuc,
             -0.771 + (note * 0.0228),
-            1.28,
-            0.955 + (note * 0.0011),
+            1.29,
+            0.95 + (note * 0.00143),
             0.0870129,
             -0.0676836,
             -0.64532,
@@ -184,8 +185,8 @@ class RoboticArm():
         self.pos = PositionController(
             self.fanuc,
             -0.771 + (note * 0.0228),
-            1.28,
-            0.955 + (note * 0.0011) + (claw_spacing * -0.0015),
+            1.29,
+            0.95 + (note * 0.00143) + (claw_spacing * -0.0015),
             0.0870129,
             -0.0676836,
             -0.64532,
